@@ -31,6 +31,11 @@ class UserController(private val userService: UserService) {
     @PatchMapping
     fun updateUser(@RequestBody user: User): User = userService.updateUser(user)
 
+    @PatchMapping("/updateUserPassword/{email")
+    fun updateUserPassword(@PathVariable email: String): ResponseEntity<User> {
+        return userService.updateUserPassword(email)
+    }
+
     @DeleteMapping("/{email}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteUserByEmail(@PathVariable email: String): Unit = userService.deleteUserByEmail(email)
