@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -29,6 +30,11 @@ class UserController(@Autowired private val userService: UserService) {
     @PostMapping
     fun createUser(@RequestBody user: User): ResponseEntity<User> {
         return userService.createUser(user)
+    }
+
+    @PatchMapping("/{email")
+    fun updateUserPassword(@PathVariable email: String, @RequestBody user: User): ResponseEntity<User> {
+        return userService.updateUser(email, user)
     }
 
     @DeleteMapping("/{email}")

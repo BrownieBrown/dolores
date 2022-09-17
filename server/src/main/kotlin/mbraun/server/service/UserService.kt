@@ -40,6 +40,22 @@ class UserService(@Autowired private val userRepository: UserRepository) {
         return ResponseEntity<User>(user, HttpStatus.CREATED)
     }
 
+    fun updateUser(email: String, user: User): ResponseEntity<User> {
+        val userToUpdate = userRepository.findByEmail(email) ?: throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "No user with email: $email exists."
+        )
+
+        userToUpdate.hashed_password = user.hashed_password
+        userToUpdate.fullName = user.fullName
+        val emailToUpdateExists = userRepository.existsByEmail(user.email)
+        if (emailToUpdateExists) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "A user with email: ${user.email} already exists.")
+        }
+
+        return ResponseEntity<User>(user, HttpStatus.ACCEPTED)
+    }
+
     fun deleteUserByEmail(email: String): ResponseEntity<User> {
         val user = userRepository.findByEmail(email)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No user with email: $email exists.")
