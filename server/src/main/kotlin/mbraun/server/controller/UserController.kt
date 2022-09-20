@@ -3,6 +3,7 @@ package mbraun.server.controller
 import mbraun.server.model.User
 import mbraun.server.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,27 +20,37 @@ class UserController(@Autowired private val userService: UserService) {
 
     @GetMapping
     fun getAllUser(): ResponseEntity<List<User>> {
-        return userService.getAllUser()
+        val user = userService.getAllUser()
+
+        return ResponseEntity(user, HttpStatus.OK)
     }
 
     @GetMapping("/{email}")
     fun getUserByEmail(@PathVariable email: String): ResponseEntity<User> {
-        return userService.getUserByEmail(email)
+        val user = userService.getUserByEmail(email)
+
+        return ResponseEntity(user, HttpStatus.OK)
+
     }
 
     @PostMapping
     fun createUser(@RequestBody user: User): ResponseEntity<User> {
-        return userService.createUser(user)
+        val newUser = userService.createUser(user)
+
+        return ResponseEntity(newUser, HttpStatus.CREATED)
     }
 
-    @PatchMapping("/{email")
-    fun updateUserPassword(@PathVariable email: String, @RequestBody user: User): ResponseEntity<User> {
-        return userService.updateUser(email, user)
+    @PatchMapping("/{email}")
+    fun updateUser(@PathVariable email: String, @RequestBody payload: User): ResponseEntity<User> {
+        return ResponseEntity(userService.updateUser(email, payload), HttpStatus.OK)
+
     }
 
     @DeleteMapping("/{email}")
     fun deleteUserByEmail(@PathVariable email: String): ResponseEntity<User> {
-        return userService.deleteUserByEmail(email)
+        val user = userService.getUserByEmail(email)
+        userService.deleteUserByEmail(email)
+        return ResponseEntity(user, HttpStatus.OK)
     }
 
     @DeleteMapping
