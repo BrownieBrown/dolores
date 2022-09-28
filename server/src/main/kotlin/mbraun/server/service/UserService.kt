@@ -25,7 +25,7 @@ class UserService(@Autowired private val userRepository: UserRepository) {
         val emailExists = userRepository.existsByEmail(user.email)
 
         if (emailExists) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "A user with email: ${user.email} already exists.")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "A user with email: ${user.email} already exists.")
         }
 
         return userRepository.save(user)

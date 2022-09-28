@@ -1,5 +1,6 @@
 package mbraun.server.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import mbraun.server.model.User
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -11,13 +12,14 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 
 @SpringBootTest
 @AutoConfigureMockMvc
-internal class UserControllerTest {
-
-    @Autowired
-    lateinit var mockMvc: MockMvc
+internal class UserControllerTest @Autowired constructor(
+    private val mockMvc: MockMvc,
+    private val objectMapper: ObjectMapper
+) {
 
     val baseUrl = "/api/v1/user"
 
@@ -66,7 +68,7 @@ internal class UserControllerTest {
             // given
             val email = "wrong.email@google.com"
 
-            // when
+            // when then
             mockMvc.get("$baseUrl/$email")
                 .andDo { print() }
                 .andExpect {
@@ -74,5 +76,52 @@ internal class UserControllerTest {
                 }
         }
     }
-    
+
+    @Nested
+    @DisplayName("createUser()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class CreateUser {
+
+        @Test
+        fun `should create a new user`() {
+            // given
+            val user = User(email = "user@google.com", hashed_password = "1234", fullName = "test user")
+
+            // when the
+            val performPost = mockMvc.post(baseUrl) {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(user)
+            }
+
+            // then
+            performPost
+                .andDo { print() }
+                .andExpect {
+                    status { isCreated() }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.email") { value("user@google.com") }
+                }
+        }
+
+        @Test
+        fun `should return BAD_REQUEST if email already exists`() {
+            // given
+            val user = User(email = "cclampe0@economist.com", hashed_password = "1234", fullName = "test user")
+
+            // when
+            val performPost = mockMvc.post(baseUrl) {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(user)
+            }
+
+            // then
+            performPost
+                .andDo { print() }
+                .andExpect {
+                    status { isBadRequest() }
+                }
+        }
+
+    }
+
 }
