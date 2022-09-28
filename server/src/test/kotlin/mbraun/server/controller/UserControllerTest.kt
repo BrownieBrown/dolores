@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
 
 @SpringBootTest
@@ -85,7 +86,11 @@ internal class UserControllerTest @Autowired constructor(
         @Test
         fun `should create a new user`() {
             // given
-            val user = User(email = "user@google.com", hashed_password = "1234", fullName = "test user")
+            val user = User(
+                email = "user@google.com",
+                hashed_password = "1234",
+                fullName = "test user"
+            )
 
             // when the
             val performPost = mockMvc.post(baseUrl) {
@@ -98,7 +103,9 @@ internal class UserControllerTest @Autowired constructor(
                 .andDo { print() }
                 .andExpect {
                     status { isCreated() }
-                    content { contentType(MediaType.APPLICATION_JSON) }
+                    content {
+                        contentType(MediaType.APPLICATION_JSON)
+                    }
                     jsonPath("$.email") { value("user@google.com") }
                 }
         }
@@ -121,7 +128,41 @@ internal class UserControllerTest @Autowired constructor(
                     status { isBadRequest() }
                 }
         }
-
     }
+
+    @Nested
+    @DisplayName("updateUser()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class UpdateUser {
+
+        @Test
+        fun `should update an existing user by mail`() {
+            // given
+            val updatedUser =
+                User(
+                    email = "jde1@constantcontact.com",
+                    hashed_password = "1234",
+                    fullName = "test user"
+                )
+
+            // when
+            val performPatch = mockMvc.patch(baseUrl) {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(updatedUser)
+            }
+
+            // then
+            performPatch
+                .andDo { print() }
+                .andExpect {
+                    status { isOk() }
+                    content {
+                        MediaType.APPLICATION_JSON
+                        json(objectMapper.writeValueAsString(updatedUser))
+                    }
+                }
+        }
+    }
+
 
 }

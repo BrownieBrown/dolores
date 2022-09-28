@@ -119,14 +119,16 @@ internal class UserServiceTest {
             true,
             false
         )
-        every { userRepository.existsByEmail(user.email) } returns true
+        every { userRepository.findByEmail(user.email) } returns user
+        every { userRepository.delete(user) } returns Unit
         every { userRepository.save(user) } returns user
 
         // when
-        val result = userService.updateUser(user.email, user)
-        
+        val result = userService.updateUser(user)
+
         // then
-        verify(exactly = 1) { userRepository.existsByEmail(user.email) }
+        verify(exactly = 1) { userRepository.findByEmail(user.email) }
+        verify(exactly = 1) { userRepository.delete(user) }
         verify(exactly = 1) { userRepository.save(user) }
         assertEquals(user, result)
     }

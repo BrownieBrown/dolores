@@ -40,9 +40,9 @@ class UserController(@Autowired private val userService: UserService) {
         return ResponseEntity(newUser, HttpStatus.CREATED)
     }
 
-    @PatchMapping("/{email}")
-    fun updateUser(@PathVariable email: String, @RequestBody payload: User): ResponseEntity<User> {
-        return ResponseEntity(userService.updateUser(email, payload), HttpStatus.OK)
+    @PatchMapping
+    fun updateUser(@RequestBody payload: User): ResponseEntity<User> {
+        return ResponseEntity(userService.updateUser(payload), HttpStatus.OK)
 
     }
 

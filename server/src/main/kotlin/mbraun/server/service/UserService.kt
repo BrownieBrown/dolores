@@ -28,30 +28,20 @@ class UserService(@Autowired private val userRepository: UserRepository) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "A user with email: ${user.email} already exists.")
         }
 
-        return userRepository.save(user)
+        userRepository.save(user)
+
+        return user
     }
 
-    fun updateUser(email: String, user: User): User {
+    fun updateUser(user: User): User {
+        val currentUser = userRepository.findByEmail(user.email) ?: throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "No user with email: ${user.email} exists."
+        )
+        userRepository.delete(currentUser)
+        userRepository.save(user)
 
-        val userExists = userRepository.existsByEmail(email)
-
-        return if (userExists) {
-            userRepository.save(
-                User(
-                    id = user.id,
-                    email = user.email,
-                    fullName = user.fullName,
-                    hashed_password = user.hashed_password,
-                    isActive = user.isActive,
-                    isSuperUser = user.isSuperUser
-                )
-            )
-        } else {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "No user with email: $email exists."
-            )
-        }
+        return user
     }
 
     fun deleteUserByEmail(email: String) {
