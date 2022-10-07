@@ -165,7 +165,29 @@ internal class UserControllerTest @Autowired constructor(
                     }
                 }
         }
+
+
+        @Test
+        fun `should return BAD_REQUEST if user with given email does not exist`() {
+            // given
+            val invalidUser = User(
+                email = "invalidEmail@email.com",
+                hashed_password = "1234",
+                fullName = "invalid user"
+            )
+
+            // when
+            val performPatchRequest = mockMvc.patch(baseUrl) {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(invalidUser)
+            }
+
+            // then
+            performPatchRequest
+                .andDo { print() }
+                .andExpect {
+                    status { isNotFound() }
+                }
+        }
     }
-
-
 }
