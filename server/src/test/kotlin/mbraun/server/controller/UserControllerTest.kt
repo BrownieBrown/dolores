@@ -26,7 +26,7 @@ internal class UserControllerTest @Autowired constructor(
     val baseUrl = "/api/v1/user"
 
     @Nested
-    @DisplayName("getAllUser()")
+    @DisplayName("GET /api/v1/user")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class GetBanks {
         @Test
@@ -45,7 +45,7 @@ internal class UserControllerTest @Autowired constructor(
     }
 
     @Nested
-    @DisplayName("getUserByEmail()")
+    @DisplayName("GET /api/users/{email}")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class GetUserByEmail {
 
@@ -83,7 +83,7 @@ internal class UserControllerTest @Autowired constructor(
     }
 
     @Nested
-    @DisplayName("createUser()")
+    @DisplayName("POST /api/v1/user")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class CreateUser {
 
@@ -135,7 +135,7 @@ internal class UserControllerTest @Autowired constructor(
     }
 
     @Nested
-    @DisplayName("updateUser()")
+    @DisplayName("PATCH /api/v1/user")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class UpdateUser {
 
@@ -193,7 +193,7 @@ internal class UserControllerTest @Autowired constructor(
     }
 
     @Nested
-    @DisplayName("deleteUserByEmail()")
+    @DisplayName("DELETE /api/v1/user/{email}")
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class DeleteUserByEmail {
 
