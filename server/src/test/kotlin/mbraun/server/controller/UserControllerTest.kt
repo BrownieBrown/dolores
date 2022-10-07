@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
@@ -189,5 +190,50 @@ internal class UserControllerTest @Autowired constructor(
                     status { isNotFound() }
                 }
         }
+    }
+
+    @Nested
+    @DisplayName("deleteUserByEmail()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class DeleteUserByEmail {
+
+        @Test
+        fun `should delete the user with given email`() {
+            // given
+            val email = "cclampe0@economist.com"
+
+            // when
+            val performDeleteRequest = mockMvc.delete("$baseUrl/$email")
+
+            val performGetRequest = mockMvc.get("$baseUrl/$email")
+
+            // then
+            performDeleteRequest
+                .andDo { print() }
+                .andExpect {
+                    status { isNoContent() }
+                }
+
+            performGetRequest
+                .andDo { print() }
+                .andExpect {
+                    status { isNotFound() }
+                }
+        }
+
+        @Test
+        fun `should return NOT_FOUND if user with given email does not exist`() {
+            // given
+            val invalidEmail = "invalidEmail@email.com"
+
+            // when
+            val performDeleteRequest = mockMvc.delete("$baseUrl/$invalidEmail")
+
+            // then
+            performDeleteRequest
+                .andDo { print() }
+                .andExpect { status { isNotFound() } }
+        }
+
     }
 }

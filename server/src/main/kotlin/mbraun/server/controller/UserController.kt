@@ -48,9 +48,9 @@ class UserController(@Autowired private val userService: UserService) {
 
     @DeleteMapping("/{email}")
     fun deleteUserByEmail(@PathVariable email: String): ResponseEntity<User> {
-        val user = userService.getUserByEmail(email)
         userService.deleteUserByEmail(email)
-        return ResponseEntity(user, HttpStatus.OK)
+
+        return ResponseEntity(HttpStatus.NO_CONTENT)
     }
 
     @DeleteMapping

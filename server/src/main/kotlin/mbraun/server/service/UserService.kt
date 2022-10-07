@@ -50,7 +50,7 @@ class UserService(@Autowired private val userRepository: UserRepository) {
             "No user with email: $email exists."
         )
 
-        return userRepository.deleteByEmail(user.email)
+        return userRepository.delete(user)
     }
 
     fun deleteAllUsers() {
