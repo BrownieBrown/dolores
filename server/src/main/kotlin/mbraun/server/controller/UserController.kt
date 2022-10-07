@@ -4,7 +4,6 @@ import mbraun.server.model.User
 import mbraun.server.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -19,42 +19,19 @@ import org.springframework.web.bind.annotation.RestController
 class UserController(@Autowired private val userService: UserService) {
 
     @GetMapping
-    fun getAllUser(): ResponseEntity<List<User>> {
-        val user = userService.getAllUser()
-
-        return ResponseEntity(user, HttpStatus.OK)
-    }
+    fun getAllUser(): Collection<User> = userService.getAllUser()
 
     @GetMapping("/{email}")
-    fun getUserByEmail(@PathVariable email: String): ResponseEntity<User> {
-        val user = userService.getUserByEmail(email)
-
-        return ResponseEntity(user, HttpStatus.OK)
-
-    }
+    fun getUserByEmail(@PathVariable email: String): User = userService.getUserByEmail(email)
 
     @PostMapping
-    fun createUser(@RequestBody user: User): ResponseEntity<User> {
-        val newUser = userService.createUser(user)
-
-        return ResponseEntity(newUser, HttpStatus.CREATED)
-    }
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createUser(@RequestBody user: User): User = userService.createUser(user)
 
     @PatchMapping
-    fun updateUser(@RequestBody payload: User): ResponseEntity<User> {
-        return ResponseEntity(userService.updateUser(payload), HttpStatus.OK)
-
-    }
+    fun updateUser(@RequestBody user: User): User = userService.updateUser(user)
 
     @DeleteMapping("/{email}")
-    fun deleteUserByEmail(@PathVariable email: String): ResponseEntity<User> {
-        userService.deleteUserByEmail(email)
-
-        return ResponseEntity(HttpStatus.NO_CONTENT)
-    }
-
-    @DeleteMapping
-    fun deleteAllUsers() {
-        userService.deleteAllUsers()
-    }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteUserByEmail(@PathVariable email: String): Unit = userService.deleteUserByEmail(email)
 }
