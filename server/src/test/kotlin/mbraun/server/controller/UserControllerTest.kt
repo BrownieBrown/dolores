@@ -53,15 +53,16 @@ internal class UserControllerTest @Autowired constructor(
             // given
             val email = "pniessen4@archive.org"
 
-            // when then
-            mockMvc.get("$baseUrl/$email")
-                .andDo { print() }
+            // when
+            val performGetRequest = mockMvc.get("$baseUrl/$email")
+
+            // then
+            performGetRequest.andDo { print() }
                 .andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
                     jsonPath("$.fullName") { value("Penny Niessen") }
                 }
-
         }
 
         @Test
@@ -69,9 +70,11 @@ internal class UserControllerTest @Autowired constructor(
             // given
             val email = "wrong.email@google.com"
 
-            // when then
-            mockMvc.get("$baseUrl/$email")
-                .andDo { print() }
+            // when
+            val performGetRequest = mockMvc.get("$baseUrl/$email")
+
+            // then
+            performGetRequest.andDo { print() }
                 .andExpect {
                     status { isNotFound() }
                 }
@@ -92,14 +95,14 @@ internal class UserControllerTest @Autowired constructor(
                 fullName = "test user"
             )
 
-            // when the
-            val performPost = mockMvc.post(baseUrl) {
+            // when
+            val performPostRequest = mockMvc.post(baseUrl) {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(user)
             }
 
             // then
-            performPost
+            performPostRequest
                 .andDo { print() }
                 .andExpect {
                     status { isCreated() }
@@ -111,18 +114,18 @@ internal class UserControllerTest @Autowired constructor(
         }
 
         @Test
-        fun `should return BAD_REQUEST if email already exists`() {
+        fun `should return BAD_REQUEST if user with given email already exists`() {
             // given
             val user = User(email = "cclampe0@economist.com", hashed_password = "1234", fullName = "test user")
 
             // when
-            val performPost = mockMvc.post(baseUrl) {
+            val performPostRequest = mockMvc.post(baseUrl) {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(user)
             }
 
             // then
-            performPost
+            performPostRequest
                 .andDo { print() }
                 .andExpect {
                     status { isBadRequest() }
@@ -146,13 +149,13 @@ internal class UserControllerTest @Autowired constructor(
                 )
 
             // when
-            val performPatch = mockMvc.patch(baseUrl) {
+            val performPatchRequest = mockMvc.patch(baseUrl) {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(updatedUser)
             }
 
             // then
-            performPatch
+            performPatchRequest
                 .andDo { print() }
                 .andExpect {
                     status { isOk() }
