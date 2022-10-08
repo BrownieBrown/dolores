@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException
 @Service
 class UserService(@Autowired private val userRepository: UserRepository) {
 
-    fun getAllUser(): MutableList<User> {
+    fun getAllUser(): Collection<User> {
         return userRepository.findAll()
     }
 
