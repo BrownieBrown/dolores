@@ -1,5 +1,7 @@
 package mbraun.server.model
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -15,6 +17,7 @@ data class User(
     var email: String = "",
     var fullName: String = "",
     var password: String = "",
+    val createdAt: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
     var isActive: Boolean = false,
     var isSuperUser: Boolean = false
 )
