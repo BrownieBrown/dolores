@@ -26,16 +26,12 @@ internal class UserServiceTest {
                 "cclampe0@economist.com",
                 "Claybourne Clampe",
                 "DPmySioRuUT",
-                true,
-                false
             ),
             User(
                 UUID.fromString("47516273-07ea-4307-9413-ae7df6e3e21e"),
                 "marco.braun2013@icloud.com",
                 "Marco Braun",
                 "DPmySioRuUT",
-                true,
-                false
             )
         )
         every { userRepository.findAll() } returns userList
@@ -52,12 +48,10 @@ internal class UserServiceTest {
     fun `getUserByMail() returns user`() {
         // user
         val user = User(
-            UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
-            "cclampe0@economist.com",
-            "Claybourne Clampe",
-            "DPmySioRuUT",
-            true,
-            false
+            id = UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+            email = "cclampe0@economist.com",
+            fullName = "Claybourne Clampe",
+            password = "DPmySioRuUT",
         )
         every { userRepository.findByEmail(user.email) } returns user
 
@@ -91,8 +85,6 @@ internal class UserServiceTest {
             "cclampe0@economist.com",
             "Claybourne Clampe",
             "DPmySioRuUT",
-            true,
-            false
         )
         every { userRepository.existsByEmail(user.email) } returns false
         every { userRepository.save(user) } returns user
@@ -116,8 +108,6 @@ internal class UserServiceTest {
             "cclampe0@economist.com",
             "Claybourne Clampe",
             "DPmySioRuUT",
-            true,
-            false
         )
         every { userRepository.findByEmail(user.email) } returns user
         every { userRepository.delete(user) } returns Unit
@@ -141,8 +131,6 @@ internal class UserServiceTest {
             "cclampe0@economist.com",
             "Claybourne Clampe",
             "DPmySioRuUT",
-            true,
-            false
         )
         every { userRepository.findByEmail(user.email) } returns user
         every { userRepository.delete(user) } returns Unit
