@@ -14,7 +14,7 @@ data class User(
     val id: UUID = UUID.randomUUID(),
     var email: String = "",
     var fullName: String = "",
-    var hashed_password: String = "",
+    var password: String = "",
     var isActive: Boolean = false,
     var isSuperUser: Boolean = false
 )

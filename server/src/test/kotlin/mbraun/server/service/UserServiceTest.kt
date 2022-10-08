@@ -145,14 +145,14 @@ internal class UserServiceTest {
             false
         )
         every { userRepository.findByEmail(user.email) } returns user
-        every { userRepository.deleteByEmail(user.email) } returns Unit
+        every { userRepository.delete(user) } returns Unit
 
         // when
         userService.deleteUserByEmail(user.email)
 
         // then
         verify(exactly = 1) { userRepository.findByEmail(user.email) }
-        verify(exactly = 1) { userRepository.deleteByEmail(user.email) }
+        verify(exactly = 1) { userRepository.delete(user) }
     }
 
     @Test
