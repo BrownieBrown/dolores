@@ -4,8 +4,10 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
+import javax.persistence.ManyToMany
 import javax.persistence.Table
 
 @Entity
@@ -18,6 +20,6 @@ data class User(
     var fullName: String = "",
     var password: String = "",
     val createdAt: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-    var isActive: Boolean = false,
-    var isSuperUser: Boolean = false
+    @ManyToMany(fetch = FetchType.EAGER)
+    var roles: Collection<Role> = emptyList()
 )
