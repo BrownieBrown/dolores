@@ -5,10 +5,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import mbraun.server.model.User
 import mbraun.server.repository.UserRepository
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 
@@ -17,141 +20,243 @@ internal class UserServiceTest {
     private val userRepository: UserRepository = mockk()
     private val userService: UserService = UserService(userRepository)
 
-    @Test
-    fun `function getAllUser() return collection of all user`() {
-        // given
-        val userList = listOf(
-            User(
+    @Nested
+    @DisplayName("getAllUser()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class GetAllUser {
+
+        @Test
+        fun `returns collection of all user`() {
+            // given
+            val userList = listOf(
+                User(
+                    UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                    "cclampe0@economist.com",
+                    "Claybourne Clampe",
+                    "DPmySioRuUT",
+                ),
+                User(
+                    UUID.fromString("47516273-07ea-4307-9413-ae7df6e3e21e"),
+                    "marco.braun2013@icloud.com",
+                    "Marco Braun",
+                    "DPmySioRuUT",
+                )
+            )
+            every { userRepository.findAll() } returns userList
+
+            // when
+            val result = userService.getAllUser()
+
+            // then
+            verify(exactly = 1) { userRepository.findAll() }
+            assertEquals(userList, result)
+        }
+
+    }
+
+    @Nested
+    @DisplayName("getUserByEmail()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class GetUserByEmail {
+
+        @Test
+        fun `returns existing user by email `() {
+            // given
+            val user = User(
+                id = UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                email = "cclampe0@economist.com",
+                fullName = "Claybourne Clampe",
+                password = "DPmySioRuUT",
+            )
+            every { userRepository.findByEmail(user.email) } returns user
+
+            // when
+            val result = userService.getUserByEmail(user.email)
+
+            // then
+            verify(exactly = 1) { userRepository.findByEmail(user.email) }
+            assertEquals(user, result)
+        }
+
+        @Test
+        fun `throws NOT_FOUND when no user is found`() {
+            // given
+            val userEmail = "test@example.com"
+            every { userRepository.findByEmail(userEmail) } returns null
+
+            //when
+            val exception = assertThrows<ResponseStatusException> { userService.getUserByEmail(userEmail) }
+
+            //then
+            verify(exactly = 1) { userRepository.findByEmail(userEmail) }
+            assertEquals(
+                "No user with email: $userEmail exists.",
+                exception.reason
+            )
+            assertEquals(HttpStatus.NOT_FOUND, exception.status)
+        }
+    }
+
+    @Nested
+    @DisplayName("createUser()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class CreateUser {
+
+        @Test
+        fun `successfully creates user`() {
+            //given
+            val user = User(
                 UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
                 "cclampe0@economist.com",
                 "Claybourne Clampe",
                 "DPmySioRuUT",
-            ),
-            User(
-                UUID.fromString("47516273-07ea-4307-9413-ae7df6e3e21e"),
-                "marco.braun2013@icloud.com",
-                "Marco Braun",
+            )
+            every { userRepository.existsByEmail(user.email) } returns false
+            every { userRepository.save(user) } returns user
+
+            //when
+            userService.createUser(user)
+
+            //then
+            // TODO Why are there 2 calls for existsByEmail()?
+            verify { userRepository.existsByEmail(user.email) }
+            verify(exactly = 1) { userRepository.save(user) }
+        }
+
+        @Test
+        fun `throws CONFLICT when email already exists`() {
+            //given
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
                 "DPmySioRuUT",
             )
-        )
-        every { userRepository.findAll() } returns userList
+            every { userRepository.existsByEmail(user.email) } returns true
 
-        // when
-        val result = userService.getAllUser()
+            //when
+            val exception = assertThrows<ResponseStatusException> { userService.createUser(user) }
 
-        //then
-        verify(exactly = 1) { userRepository.findAll() }
-        assertEquals(userList, result)
+            //then
+            verify(exactly = 1) { userRepository.existsByEmail(user.email) }
+            verify(exactly = 0) { userRepository.save(user) }
+            assertEquals("A user with email: ${user.email} already exists.", exception.reason)
+            assertEquals(HttpStatus.CONFLICT, exception.status)
+        }
     }
 
-    @Test
-    fun `getUserByMail() returns user`() {
-        // given
-        val user = User(
-            id = UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
-            email = "cclampe0@economist.com",
-            fullName = "Claybourne Clampe",
-            password = "DPmySioRuUT",
-        )
-        every { userRepository.findByEmail(user.email) } returns user
+    @Nested
+    @DisplayName("updateUser()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class UpdateUser {
 
-        // when
-        val result = userService.getUserByEmail(user.email)
+        @Test
+        fun `successfully updates user`() {
+            // given
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+            )
+            every { userRepository.findByEmail(user.email) } returns user
+            every { userRepository.delete(user) } returns Unit
+            every { userRepository.save(user) } returns user
 
-        // then
-        verify(exactly = 1) { userRepository.findByEmail(user.email) }
-        assertEquals(user, result)
+            // when
+            val result = userService.updateUser(user)
 
+            // then
+            // TODO Why are there 2 calls?
+            verify(exactly = 2) { userRepository.findByEmail(user.email) }
+            verify(exactly = 1) { userRepository.delete(user) }
+            verify(exactly = 1) { userRepository.save(user) }
+            assertEquals(user, result)
+        }
+
+        @Test
+        fun `throws NOT_FOUND when no user is found`() {
+            // given
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+            )
+            every { userRepository.findByEmail(user.email) } returns null
+
+            // when
+            val exception = assertThrows<ResponseStatusException> { userService.updateUser(user) }
+
+            // then
+            verify(exactly = 1) { userRepository.findByEmail(user.email) }
+            assertEquals(HttpStatus.NOT_FOUND, exception.status)
+            assertEquals("No user with email: ${user.email} exists.", exception.reason)
+
+        }
     }
 
-    @Test
-    fun `getUserByEmail() throws NOT_FOUND when null`() {
-        // given
-        val userEmail = "test@example.com"
-        every { userRepository.findByEmail(userEmail) } returns null
+    @Nested
+    @DisplayName("deleteUserByEmail()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class DeleteUserByEmail {
 
-        //when
+        @Test
+        fun deleteUserByEmail() {
+            // given
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+            )
+            every { userRepository.findByEmail(user.email) } returns user
+            every { userRepository.delete(user) } returns Unit
 
-        //then
-        verify(exactly = 0) { userRepository.findByEmail(userEmail) }
-        assertThrows<ResponseStatusException> { userService.getUserByEmail(userEmail) }
+            // when
+            userService.deleteUserByEmail(user.email)
+
+            // then
+            verify(exactly = 1) { userRepository.findByEmail(user.email) }
+            verify(exactly = 1) { userRepository.delete(user) }
+        }
+
+        @Test
+        fun `throws NOT_FOUND when no user is found`() {
+            // given
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+            )
+            every { userRepository.findByEmail(user.email) } returns null
+
+            // when
+            val exception = assertThrows<ResponseStatusException> { userService.deleteUserByEmail(user.email) }
+
+            // then
+            assertEquals(HttpStatus.NOT_FOUND, exception.status)
+            assertEquals("No user with email: ${user.email} exists.", exception.reason)
+
+        }
     }
 
-    @Test
-    fun `createUser() successfully creates user`() {
-        //given
-        val user = User(
-            UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
-            "cclampe0@economist.com",
-            "Claybourne Clampe",
-            "DPmySioRuUT",
-        )
-        every { userRepository.existsByEmail(user.email) } returns false
-        every { userRepository.save(user) } returns user
-        every { userRepository.findByEmail(user.email) } returns user
+    @Nested
+    @DisplayName("deleteAllUsers()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class DeleteAllUsers {
 
-        //when
-        userService.createUser(user)
+        @Test
+        fun deleteAllUsers() {
+            // given
+            every { userRepository.deleteAll() } returns Unit
 
-        //then
-        verify(exactly = 1) { userRepository.existsByEmail(user.email) }
-        verify(exactly = 1) { userRepository.save(user) }
-        Assertions.assertThat(userRepository.findByEmail(user.email)).isNotNull
+            // when
+            userService.deleteAllUsers()
 
-    }
-
-    @Test
-    fun updateUser() {
-        // given
-        val user = User(
-            UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
-            "cclampe0@economist.com",
-            "Claybourne Clampe",
-            "DPmySioRuUT",
-        )
-        every { userRepository.findByEmail(user.email) } returns user
-        every { userRepository.delete(user) } returns Unit
-        every { userRepository.save(user) } returns user
-
-        // when
-        val result = userService.updateUser(user)
-
-        // then
-        verify(exactly = 1) { userRepository.findByEmail(user.email) }
-        verify(exactly = 1) { userRepository.delete(user) }
-        verify(exactly = 1) { userRepository.save(user) }
-        assertEquals(user, result)
-    }
-
-    @Test
-    fun deleteUserByEmail() {
-        // given
-        val user = User(
-            UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
-            "cclampe0@economist.com",
-            "Claybourne Clampe",
-            "DPmySioRuUT",
-        )
-        every { userRepository.findByEmail(user.email) } returns user
-        every { userRepository.delete(user) } returns Unit
-
-        // when
-        userService.deleteUserByEmail(user.email)
-
-        // then
-        verify(exactly = 1) { userRepository.findByEmail(user.email) }
-        verify(exactly = 1) { userRepository.delete(user) }
-    }
-
-    @Test
-    fun deleteAllUsers() {
-        // given
-        every { userRepository.deleteAll() } returns Unit
-
-        // when
-        userService.deleteAllUsers()
-
-        //then
-        verify(exactly = 1) { userRepository.deleteAll() }
+            //then
+            verify(exactly = 1) { userRepository.deleteAll() }
+        }
     }
 }
