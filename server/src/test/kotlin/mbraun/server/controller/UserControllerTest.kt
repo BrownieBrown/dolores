@@ -115,7 +115,7 @@ internal class UserControllerTest @Autowired constructor(
         }
 
         @Test
-        fun `should return BAD_REQUEST if user with given email already exists`() {
+        fun `should return CONFLICT if user with given email already exists`() {
             // given
             val user = User(email = "cclampe0@economist.com", password = "1234", fullName = "test user")
 
@@ -129,7 +129,7 @@ internal class UserControllerTest @Autowired constructor(
             performPostRequest
                 .andDo { print() }
                 .andExpect {
-                    status { isBadRequest() }
+                    status { isConflict() }
                 }
         }
     }

@@ -18,7 +18,7 @@ internal class UserServiceTest {
     private val userService: UserService = UserService(userRepository)
 
     @Test
-    fun `function getAllUser() return list of User`() {
+    fun `function getAllUser() return collection of all user`() {
         // given
         val userList = listOf(
             User(
@@ -46,7 +46,7 @@ internal class UserServiceTest {
 
     @Test
     fun `getUserByMail() returns user`() {
-        // user
+        // given
         val user = User(
             id = UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
             email = "cclampe0@economist.com",
