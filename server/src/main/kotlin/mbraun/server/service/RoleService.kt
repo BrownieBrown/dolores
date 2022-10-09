@@ -24,7 +24,7 @@ class RoleService(@Autowired private val roleRepository: RoleRepository) {
         val roleExists = roleRepository.existsByName(role.name)
 
         if (roleExists) {
-            throw ResponseStatusException(HttpStatus.CONFLICT, "Role with name: $role.name already exists.")
+            throw ResponseStatusException(HttpStatus.CONFLICT, "Role with name: ${role.name} already exists.")
         }
 
         return roleRepository.save(role)
@@ -33,7 +33,7 @@ class RoleService(@Autowired private val roleRepository: RoleRepository) {
     fun updateRole(role: Role): Role {
         val currentRole = roleRepository.findByName(role.name) ?: throw ResponseStatusException(
             HttpStatus.NOT_FOUND,
-            "No role with name: $role.name exists."
+            "No role with name: ${role.name} exists."
         )
 
         roleRepository.delete(role)

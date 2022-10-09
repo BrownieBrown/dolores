@@ -10,6 +10,9 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 
 internal class RoleServiceTest {
     private val roleRepository: RoleRepository = mockk()
@@ -53,6 +56,21 @@ internal class RoleServiceTest {
             verify(exactly = 1) { roleRepository.findByName(role.name) }
             assertEquals(role, result)
         }
+
+        @Test
+        fun `returns NOT_FOUND if role not found`() {
+            // given
+            val invalidRole = Role(1, "invalid")
+            every { roleRepository.findByName(invalidRole.name) } returns null
+
+            // when
+            val exception = assertThrows<ResponseStatusException> { roleService.getRoleByName(invalidRole.name) }
+
+            // then
+            verify(exactly = 1) { roleRepository.findByName(invalidRole.name) }
+            assertEquals(HttpStatus.NOT_FOUND, exception.status)
+            assertEquals("No role with name: ${invalidRole.name} exists.", exception.reason)
+        }
     }
 
     @Nested
@@ -75,6 +93,22 @@ internal class RoleServiceTest {
             verify(exactly = 1) { roleRepository.save(role) }
             assertEquals(role, result)
         }
+
+        @Test
+        fun `throws CONFLICT if role already exists`() {
+            // given
+            val role = Role(1, "admin")
+            every { roleRepository.existsByName(role.name) } returns true
+
+            // when
+            val exception = assertThrows<ResponseStatusException> { roleService.createRole(role) }
+
+            // then
+            // TODO why are there 2 calls?
+            verify(exactly = 2) { roleRepository.existsByName(role.name) }
+            assertEquals(HttpStatus.CONFLICT, exception.status)
+            assertEquals("Role with name: ${role.name} already exists.", exception.reason)
+        }
     }
 
     @Nested
@@ -94,10 +128,27 @@ internal class RoleServiceTest {
             val result = roleService.updateRole(role)
 
             // then
-            verify(exactly = 1) { roleRepository.findByName(role.name) }
+            verify { roleRepository.findByName(role.name) }
             verify(exactly = 1) { roleRepository.delete(role) }
             verify(exactly = 1) { roleRepository.save(role) }
             assertEquals(role, result)
+        }
+
+        @Test
+        fun `throws NOT_FOUND if role not found`() {
+            // given
+            val role = Role(1, "admin")
+            every { roleRepository.findByName(role.name) } returns null
+
+            // when
+            val exception = assertThrows<ResponseStatusException> { roleService.updateRole(role) }
+
+            // then
+            verify(exactly = 1) { roleRepository.findByName(role.name) }
+            verify(exactly = 0) { roleRepository.delete(role) }
+            verify(exactly = 0) { roleRepository.save(role) }
+            assertEquals(HttpStatus.NOT_FOUND, exception.status)
+            assertEquals("No role with name: ${role.name} exists.", exception.reason)
         }
     }
 
@@ -117,8 +168,24 @@ internal class RoleServiceTest {
             roleService.deleteRoleByName(role.name)
 
             // then
-            verify(exactly = 1) { roleRepository.findByName(role.name) }
+            verify { roleRepository.findByName(role.name) }
             verify(exactly = 1) { roleRepository.delete(role) }
+        }
+
+        @Test
+        fun `throws NOT_FOUND if role not found`() {
+            // given
+            val role = Role(1, "admin")
+            every { roleRepository.findByName(role.name) } returns null
+
+            // when
+            val exception = assertThrows<ResponseStatusException> { roleService.deleteRoleByName(role.name) }
+
+            // then
+            verify(exactly = 1) { roleRepository.findByName(role.name) }
+            verify(exactly = 0) { roleRepository.delete(role) }
+            assertEquals(HttpStatus.NOT_FOUND, exception.status)
+            assertEquals("No role with name: ${role.name} exists.", exception.reason)
         }
     }
 
