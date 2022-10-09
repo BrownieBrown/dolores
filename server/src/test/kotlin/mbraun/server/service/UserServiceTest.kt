@@ -3,6 +3,7 @@ package mbraun.server.service
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import mbraun.server.model.Role
 import mbraun.server.model.User
 import mbraun.server.repository.RoleRepository
 import mbraun.server.repository.UserRepository
@@ -259,6 +260,85 @@ internal class UserServiceTest {
 
             //then
             verify(exactly = 1) { userRepository.deleteAll() }
+        }
+    }
+
+    @Nested
+    @DisplayName("addRoleToUser()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class AddRoleToUser {
+
+        @Test
+        fun `adds role to user`() {
+            // given
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+                roles = arrayListOf()
+            )
+            val role = Role(1, "admin")
+            every { userRepository.findByEmail(user.email) } returns user
+            every { roleRepository.findByName(role.name) } returns role
+            every { userRepository.save(user) } returns user
+
+            // when
+            userService.addRoleToUser(user.email, role.name)
+            val result = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+                roles = arrayListOf(Role(1, "admin"))
+            )
+
+            // then
+            assertEquals(result, user)
+        }
+
+        @Test
+        fun `throws NOT_FOUND when no user is found`() {
+            // given
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+                roles = arrayListOf()
+            )
+            val role = Role(1, "admin")
+            every { userRepository.findByEmail(user.email) } returns null
+
+            // when
+            val exception = assertThrows<ResponseStatusException> { userService.addRoleToUser(user.email, role.name) }
+
+            // then
+            assertEquals(HttpStatus.NOT_FOUND, exception.status)
+            assertEquals("No user with email: ${user.email} exists.", exception.reason)
+        }
+
+        @Test
+        fun `throws NOT_FOUND when no role is found`() {
+            // given
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+                roles = arrayListOf()
+            )
+            val role = Role(1, "admin")
+            every { userRepository.findByEmail(user.email) } returns user
+            every { roleRepository.findByName(role.name) } returns null
+
+            // when
+            val exception = assertThrows<ResponseStatusException> { userService.addRoleToUser(user.email, role.name) }
+
+
+            // then
+            assertEquals(HttpStatus.NOT_FOUND, exception.status)
+            assertEquals("No role with name: ${role.name} exists.", exception.reason)
         }
     }
 }
