@@ -1,14 +1,14 @@
 package mbraun.server.service
 
 import mbraun.server.model.User
+import mbraun.server.repository.RoleRepository
 import mbraun.server.repository.UserRepository
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
 @Service
-class UserService(@Autowired private val userRepository: UserRepository) {
+class UserService(private val userRepository: UserRepository, private val roleRepository: RoleRepository) {
 
     fun getAllUser(): Collection<User> {
         return userRepository.findAll()
@@ -55,5 +55,27 @@ class UserService(@Autowired private val userRepository: UserRepository) {
 
     fun deleteAllUsers() {
         return userRepository.deleteAll()
+    }
+
+    fun addRoleToUser(email: String, roleName: String) {
+        val user = userRepository.findByEmail(email) ?: throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "No user with email: $email exists."
+        )
+
+        val role = roleRepository.findByName(roleName) ?: throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "No role with name: $roleName exists."
+        )
+
+        if (user.roles.contains(role)) {
+            throw ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "User with email: $email already has role."
+            )
+        }
+
+        user.roles.add(role)
+        userRepository.save(user)
     }
 }

@@ -2,7 +2,6 @@ package mbraun.server.controller
 
 import mbraun.server.model.User
 import mbraun.server.service.UserService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("api/v1/user")
-class UserController(@Autowired private val userService: UserService) {
+class UserController(private val userService: UserService) {
 
     @GetMapping
     fun getAllUser(): Collection<User> = userService.getAllUser()

@@ -2,13 +2,12 @@ package mbraun.server.service
 
 import mbraun.server.model.Role
 import mbraun.server.repository.RoleRepository
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
 @Service
-class RoleService(@Autowired private val roleRepository: RoleRepository) {
+class RoleService(private val roleRepository: RoleRepository) {
     fun getRoles(): Collection<Role> {
         return roleRepository.findAll()
     }

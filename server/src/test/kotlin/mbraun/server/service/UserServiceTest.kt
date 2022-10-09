@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import mbraun.server.model.User
+import mbraun.server.repository.RoleRepository
 import mbraun.server.repository.UserRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
@@ -18,7 +19,8 @@ import java.util.UUID
 internal class UserServiceTest {
 
     private val userRepository: UserRepository = mockk()
-    private val userService: UserService = UserService(userRepository)
+    private val roleRepository: RoleRepository = mockk()
+    private val userService: UserService = UserService(userRepository, roleRepository)
 
     @Nested
     @DisplayName("getAllUser()")
