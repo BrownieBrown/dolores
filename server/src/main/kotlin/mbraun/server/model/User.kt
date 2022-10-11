@@ -21,5 +21,5 @@ data class User(
     var password: String = "",
     val createdAt: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
     @ManyToMany(fetch = FetchType.EAGER)
-    var roles: ArrayList<Role> = arrayListOf()
+    var roles: MutableList<Role> = arrayListOf()
 )
