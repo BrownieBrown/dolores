@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import mbraun.server.model.Role
 import mbraun.server.repository.RoleRepository
+import mbraun.server.repository.UserRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -12,11 +13,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.web.server.ResponseStatusException
 
 internal class RoleServiceTest {
     private val roleRepository: RoleRepository = mockk()
-    private val roleService: RoleService = RoleService(roleRepository)
+    private val userRepository: UserRepository = mockk()
+    private val roleService: RoleService = RoleService(roleRepository, userRepository)
 
     @Nested
     @DisplayName("getRoles()")
@@ -158,9 +161,10 @@ internal class RoleServiceTest {
     inner class DeleteRole {
 
         @Test
+        @DirtiesContext
         fun `deletes an existing role`() {
             // given
-            val role = Role(1, "admin")
+            val role = Role(name = "ADMIN")
             every { roleRepository.findByName(role.name) } returns role
             every { roleRepository.delete(role) } returns Unit
 

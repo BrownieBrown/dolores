@@ -2,13 +2,16 @@ package mbraun.server.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import mbraun.server.model.User
+import mbraun.server.util.RoleToUserForm
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
@@ -17,7 +20,7 @@ import org.springframework.test.web.servlet.post
 
 @SpringBootTest
 @AutoConfigureMockMvc
-internal class UserControllerTest(
+internal class UserControllerTest @Autowired constructor(
     private val mockMvc: MockMvc,
     private val objectMapper: ObjectMapper
 ) {
@@ -87,6 +90,7 @@ internal class UserControllerTest(
     inner class CreateUser {
 
         @Test
+        @DirtiesContext
         fun `should create a new user`() {
             // given
             val user = User(
@@ -109,7 +113,7 @@ internal class UserControllerTest(
                     content {
                         contentType(MediaType.APPLICATION_JSON)
                     }
-                    jsonPath("$.email") { value("user@google.com") }
+                    jsonPath("$.email") { value(user.email) }
                 }
         }
 
@@ -168,7 +172,7 @@ internal class UserControllerTest(
 
 
         @Test
-        fun `should return BAD_REQUEST if user with given email does not exist`() {
+        fun `should return NOT_FOUND if user with given email does not exist`() {
             // given
             val invalidUser = User(
                 email = "invalidEmail@email.com",
@@ -197,6 +201,7 @@ internal class UserControllerTest(
     inner class DeleteUserByEmail {
 
         @Test
+        @DirtiesContext
         fun `should delete the user with given email`() {
             // given
             val email = "cclampe0@economist.com"
@@ -233,6 +238,162 @@ internal class UserControllerTest(
                 .andDo { print() }
                 .andExpect { status { isNotFound() } }
         }
+    }
 
+    @Nested
+    @DisplayName("POST /api/v1/users/role/add")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class AddRoleToUser {
+
+        @Test
+        fun `should add role to user`() {
+            // given
+            val email = "cclampe0@economist.com"
+            val roleName = "ADMIN"
+            val form = RoleToUserForm(email, roleName)
+
+            // when
+            val performPostRequest = mockMvc.post("$baseUrl/role/add") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(form)
+            }
+
+            // then
+            performPostRequest
+                .andDo { print() }.andExpect { status { isCreated() } }
+        }
+
+        @Test
+        fun `should return NOT_FOUND if user with given email does not exist`() {
+            // given
+            val invalidEmail = "invalidEmail@economist.com"
+            val roleName = "ADMIN"
+            val form = RoleToUserForm(invalidEmail, roleName)
+
+            // when
+            val performPostRequest = mockMvc.post("$baseUrl/role/add") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(form)
+            }
+
+            // then
+            performPostRequest
+                .andDo { print() }.andExpect { status { isNotFound() } }
+        }
+
+        @Test
+        fun `should return NOT_FOUND if role does not exist`() {
+            // given
+            val email = "cclampe0@economist.com"
+            val invalidRole = "INVALID"
+            val form = RoleToUserForm(email, invalidRole)
+
+            // when
+            val performPostRequest = mockMvc.post("$baseUrl/role/add") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(form)
+            }
+
+            // then
+            performPostRequest
+                .andDo { print() }.andExpect { status { isNotFound() } }
+        }
+
+        @Test
+        fun `should return CONFLICT if user already has role`() {
+            // given
+            val email = "jde1@constantcontact.com"
+            val roleName = "ADMIN"
+            val form = RoleToUserForm(email, roleName)
+
+            // when
+            val performPostRequest = mockMvc.post("$baseUrl/role/add") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(form)
+            }
+
+            // then
+            performPostRequest
+                .andDo { print() }.andExpect { status { isConflict() } }
+        }
+    }
+
+    @Nested
+    @DisplayName("DELETE /api/v1/users/role/remove")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class RemoveRoleFromUser {
+
+        @Test
+        @DirtiesContext
+        fun `should remove role from user`() {
+            // given
+            val email = "cclampe0@economist.com"
+            val roleName = "USER"
+            val form = RoleToUserForm(email, roleName)
+
+            // when
+            val performDeleteRequest = mockMvc.delete("$baseUrl/role/remove") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(form)
+            }
+
+            // then
+            performDeleteRequest
+                .andDo { print() }.andExpect { status { isOk() } }
+        }
+
+        @Test
+        fun `should return NOT_FOUND if user with given email does not exist`() {
+            // given
+            val invalidEmail = "invalidEmail@economist.com"
+            val roleName = "ADMIN"
+            val form = RoleToUserForm(invalidEmail, roleName)
+
+            // when
+            val performDeleteRequest = mockMvc.delete("$baseUrl/role/remove") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(form)
+            }
+
+            // then
+            performDeleteRequest
+                .andDo { print() }.andExpect { status { isNotFound() } }
+        }
+
+        @Test
+        fun `should return NOT_FOUND if role does not exist`() {
+            // given
+            val email = "cclampe0@economist.com"
+            val invalidRole = "INVALID"
+            val form = RoleToUserForm(email, invalidRole)
+
+            // when
+            val performDeleteRequest = mockMvc.delete("$baseUrl/role/remove") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(form)
+            }
+
+            // then
+            performDeleteRequest
+                .andDo { print() }.andExpect { status { isNotFound() } }
+        }
+
+        @Test
+        fun `should return CONFLICT if user does not have role`() {
+            // given
+            val email = "jde1@constantcontact.com"
+            val roleName = "MANAGER"
+            val form = RoleToUserForm(email, roleName)
+
+            // when
+            val performDeleteRequest = mockMvc.delete("$baseUrl/role/remove") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(form)
+            }
+
+            // then
+            performDeleteRequest
+                .andDo { print() }.andExpect { status { isConflict() } }
+        }
     }
 }

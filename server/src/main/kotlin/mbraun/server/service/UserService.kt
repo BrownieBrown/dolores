@@ -57,7 +57,7 @@ class UserService(private val userRepository: UserRepository, private val roleRe
         return userRepository.deleteAll()
     }
 
-    fun addRoleToUser(email: String, roleName: String) {
+    fun addRoleToUser(email: String, roleName: String): User {
         val user = userRepository.findByEmail(email) ?: throw ResponseStatusException(
             HttpStatus.NOT_FOUND,
             "No user with email: $email exists."
@@ -76,10 +76,10 @@ class UserService(private val userRepository: UserRepository, private val roleRe
         }
 
         user.roles.add(role)
-        userRepository.save(user)
+        return userRepository.save(user)
     }
 
-    fun removeRoleFromUser(email: String, roleName: String) {
+    fun removeRoleFromUser(email: String, roleName: String): User {
         val user = userRepository.findByEmail(email) ?: throw ResponseStatusException(
             HttpStatus.NOT_FOUND,
             "No user with email: $email exists."
@@ -92,12 +92,12 @@ class UserService(private val userRepository: UserRepository, private val roleRe
 
         if (!user.roles.contains(role)) {
             throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.CONFLICT,
                 "The user with email: $email does not posses this role."
             )
         }
 
         user.roles.remove(role)
-        userRepository.save(user)
+        return userRepository.save(user)
     }
 }

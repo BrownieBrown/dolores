@@ -2,6 +2,7 @@ package mbraun.server.controller
 
 import mbraun.server.model.User
 import mbraun.server.service.UserService
+import mbraun.server.util.RoleToUserForm
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -33,4 +34,13 @@ class UserController(private val userService: UserService) {
     @DeleteMapping("/{email}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteUserByEmail(@PathVariable email: String): Unit = userService.deleteUserByEmail(email)
+
+    @PostMapping("/role/add")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun addRoleToUser(@RequestBody form: RoleToUserForm): User =
+        userService.addRoleToUser(form.email, form.roleName)
+
+    @DeleteMapping("/role/remove")
+    fun removeRoleFromUser(@RequestBody form: RoleToUserForm): User =
+        userService.removeRoleFromUser(form.email, form.roleName)
 }

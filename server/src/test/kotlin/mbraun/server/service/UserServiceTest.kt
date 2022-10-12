@@ -465,7 +465,7 @@ internal class UserServiceTest {
 
 
             // then
-            assertEquals(HttpStatus.BAD_REQUEST, exception.status)
+            assertEquals(HttpStatus.CONFLICT, exception.status)
             assertEquals("The user with email: ${user.email} does not posses this role.", exception.reason)
         }
     }
