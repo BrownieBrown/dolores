@@ -340,5 +340,133 @@ internal class UserServiceTest {
             assertEquals(HttpStatus.NOT_FOUND, exception.status)
             assertEquals("No role with name: ${role.name} exists.", exception.reason)
         }
+
+        @Test
+        fun `throws CONFLICT when user already has role`() {
+            // given
+            val role = Role(1, "admin")
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+                roles = arrayListOf(role)
+            )
+            every { userRepository.findByEmail(user.email) } returns user
+            every { roleRepository.findByName(role.name) } returns role
+
+            // when
+            val exception = assertThrows<ResponseStatusException> { userService.addRoleToUser(user.email, role.name) }
+
+
+            // then
+            assertEquals(HttpStatus.CONFLICT, exception.status)
+            assertEquals("User with email: ${user.email} already has role.", exception.reason)
+        }
+    }
+
+    @Nested
+    @DisplayName("removeRoleFromUser()")
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class RemoveRoleFromUser {
+
+        @Test
+        fun `removes role from user`() {
+            // given
+            val role = Role(1, "admin")
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+                roles = arrayListOf(role)
+            )
+            every { userRepository.findByEmail(user.email) } returns user
+            every { roleRepository.findByName(role.name) } returns role
+            every { userRepository.save(user) } returns user
+
+            // when
+            userService.removeRoleFromUser(user.email, role.name)
+            val result = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+                roles = arrayListOf()
+            )
+
+            // then
+            assertEquals(result, user)
+        }
+
+        @Test
+        fun `throws NOT_FOUND when no user is found`() {
+            // given
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+                roles = arrayListOf()
+            )
+            val role = Role(1, "admin")
+            every { userRepository.findByEmail(user.email) } returns null
+
+            // when
+            val exception =
+                assertThrows<ResponseStatusException> { userService.removeRoleFromUser(user.email, role.name) }
+
+            // then
+            assertEquals(HttpStatus.NOT_FOUND, exception.status)
+            assertEquals("No user with email: ${user.email} exists.", exception.reason)
+        }
+
+        @Test
+        fun `throws NOT_FOUND when no role is found`() {
+            // given
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+                roles = arrayListOf()
+            )
+            val role = Role(1, "admin")
+            every { userRepository.findByEmail(user.email) } returns user
+            every { roleRepository.findByName(role.name) } returns null
+
+            // when
+            val exception =
+                assertThrows<ResponseStatusException> { userService.removeRoleFromUser(user.email, role.name) }
+
+
+            // then
+            assertEquals(HttpStatus.NOT_FOUND, exception.status)
+            assertEquals("No role with name: ${role.name} exists.", exception.reason)
+        }
+
+        @Test
+        fun `throws CONFLICT when user does not have role`() {
+            // given
+            val role = Role(1, "admin")
+            val user = User(
+                UUID.fromString("fc2dff64-4ccb-4c71-9ef5-4bd9fb628f14"),
+                "cclampe0@economist.com",
+                "Claybourne Clampe",
+                "DPmySioRuUT",
+                roles = arrayListOf()
+            )
+            every { userRepository.findByEmail(user.email) } returns user
+            every { roleRepository.findByName(role.name) } returns role
+
+            // when
+            val exception =
+                assertThrows<ResponseStatusException> { userService.removeRoleFromUser(user.email, role.name) }
+
+
+            // then
+            assertEquals(HttpStatus.BAD_REQUEST, exception.status)
+            assertEquals("The user with email: ${user.email} does not posses this role.", exception.reason)
+        }
     }
 }
