@@ -2,12 +2,13 @@ package mbraun.server.service
 
 import mbraun.server.model.Role
 import mbraun.server.repository.RoleRepository
+import mbraun.server.repository.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 
 @Service
-class RoleService(private val roleRepository: RoleRepository) {
+class RoleService(private val roleRepository: RoleRepository, private val userRepository: UserRepository) {
     fun getRoles(): Collection<Role> {
         return roleRepository.findAll()
     }
@@ -26,7 +27,9 @@ class RoleService(private val roleRepository: RoleRepository) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Role with name: ${role.name} already exists.")
         }
 
-        return roleRepository.save(role)
+        roleRepository.save(role)
+
+        return role
     }
 
     fun updateRole(role: Role): Role {
