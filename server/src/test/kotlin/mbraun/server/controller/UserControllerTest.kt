@@ -40,7 +40,7 @@ internal class UserControllerTest @Autowired constructor(
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
                     content { listOf<User>() }
-                    jsonPath("$[0].email") { value("cclampe0@economist.com") }
+                    jsonPath("$[0].email") { value("marco.braun2013@gmail.com") }
                 }
 
         }
@@ -54,7 +54,7 @@ internal class UserControllerTest @Autowired constructor(
         @Test
         fun `should return user with given email`() {
             // given
-            val email = "pniessen4@archive.org"
+            val email = "marco.braun2013@gmail.com"
 
             // when
             val performGetRequest = mockMvc.get("$baseUrl/$email")
@@ -64,7 +64,7 @@ internal class UserControllerTest @Autowired constructor(
                 .andExpect {
                     status { isOk() }
                     content { contentType(MediaType.APPLICATION_JSON) }
-                    jsonPath("$.fullName") { value("Penny Niessen") }
+                    jsonPath("$.fullName") { value("Marco Braun") }
                 }
         }
 
@@ -120,7 +120,7 @@ internal class UserControllerTest @Autowired constructor(
         @Test
         fun `should return CONFLICT if user with given email already exists`() {
             // given
-            val user = User(email = "cclampe0@economist.com", password = "1234", fullName = "test user")
+            val user = User(email = "marco.braun2013@gmail.com", password = "1234", fullName = "Marco Braun")
 
             // when
             val performPostRequest = mockMvc.post(baseUrl) {
@@ -147,9 +147,9 @@ internal class UserControllerTest @Autowired constructor(
             // given
             val updatedUser =
                 User(
-                    email = "jde1@constantcontact.com",
+                    email = "yannick.seppich@gmx.de",
                     password = "1234",
-                    fullName = "test user"
+                    fullName = "Yannick Discopumper Seppich"
                 )
 
             // when
@@ -201,10 +201,10 @@ internal class UserControllerTest @Autowired constructor(
     inner class DeleteUserByEmail {
 
         @Test
-        @DirtiesContext
+        @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
         fun `should delete the user with given email`() {
             // given
-            val email = "cclampe0@economist.com"
+            val email = "yannick.seppich@gmx.de"
 
             // when
             val performDeleteRequest = mockMvc.delete("$baseUrl/$email")
@@ -248,7 +248,7 @@ internal class UserControllerTest @Autowired constructor(
         @Test
         fun `should add role to user`() {
             // given
-            val email = "cclampe0@economist.com"
+            val email = "yannick.seppich@gmx.de"
             val roleName = "ADMIN"
             val form = RoleToUserForm(email, roleName)
 
@@ -302,7 +302,7 @@ internal class UserControllerTest @Autowired constructor(
         @Test
         fun `should return CONFLICT if user already has role`() {
             // given
-            val email = "jde1@constantcontact.com"
+            val email = "marco.braun2013@gmail.com"
             val roleName = "ADMIN"
             val form = RoleToUserForm(email, roleName)
 
@@ -324,10 +324,9 @@ internal class UserControllerTest @Autowired constructor(
     inner class RemoveRoleFromUser {
 
         @Test
-        @DirtiesContext
         fun `should remove role from user`() {
             // given
-            val email = "cclampe0@economist.com"
+            val email = "marco.braun2013@gmail.com"
             val roleName = "USER"
             val form = RoleToUserForm(email, roleName)
 
@@ -381,7 +380,7 @@ internal class UserControllerTest @Autowired constructor(
         @Test
         fun `should return CONFLICT if user does not have role`() {
             // given
-            val email = "jde1@constantcontact.com"
+            val email = "yannick.seppich@gmx.de"
             val roleName = "MANAGER"
             val form = RoleToUserForm(email, roleName)
 

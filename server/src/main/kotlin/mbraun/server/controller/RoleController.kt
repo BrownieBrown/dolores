@@ -5,7 +5,6 @@ import mbraun.server.service.RoleService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -27,9 +26,7 @@ class RoleController(private val roleService: RoleService) {
     @ResponseStatus(HttpStatus.CREATED)
     fun createRole(@RequestBody role: Role): Role = roleService.createRole(role)
 
-    @PatchMapping
-    fun updateRole(@RequestBody role: Role): Role = roleService.updateRole(role)
-
     @DeleteMapping("/{name}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteRoleByName(@PathVariable name: String): Unit = roleService.deleteRoleByName(name)
 }

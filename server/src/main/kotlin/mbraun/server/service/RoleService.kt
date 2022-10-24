@@ -1,6 +1,7 @@
 package mbraun.server.service
 
 import mbraun.server.model.Role
+import mbraun.server.model.User
 import mbraun.server.repository.RoleRepository
 import mbraun.server.repository.UserRepository
 import org.springframework.http.HttpStatus
@@ -32,28 +33,16 @@ class RoleService(private val roleRepository: RoleRepository, private val userRe
         return role
     }
 
-    fun updateRole(role: Role): Role {
-        val currentRole = roleRepository.findByName(role.name) ?: throw ResponseStatusException(
-            HttpStatus.NOT_FOUND,
-            "No role with name: ${role.name} exists."
-        )
-
-        roleRepository.delete(role)
-        roleRepository.save(currentRole)
-
-        return currentRole
-    }
-
     fun deleteRoleByName(name: String) {
         val role = roleRepository.findByName(name) ?: throw ResponseStatusException(
             HttpStatus.NOT_FOUND,
             "No role with name: $name exists."
         )
+        val users = userRepository.findAll()
+        val usersWithRole = users.filter { user: User -> user.roles.contains(role) }
+
+        usersWithRole.forEach { user: User -> user.roles.remove(role) }
 
         return roleRepository.delete(role)
-    }
-
-    fun deleteAllRoles() {
-        return roleRepository.deleteAll()
     }
 }
