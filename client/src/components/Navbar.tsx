@@ -1,0 +1,10 @@
+import React from "react";
+import { logo } from "../assets";
+import { navLinks } from "../constants";
+
+const Navbar = () => (
+  <nav className="w-full flex py-6 justify-between items-center navbar">
+    <img src={logo} alt="logo" className="w-[124px] h-[32px]" />
+  </nav>
+);
+export default Navbar;
