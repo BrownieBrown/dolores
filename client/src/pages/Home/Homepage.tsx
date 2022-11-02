@@ -1,9 +1,8 @@
-import React from 'react'
-import './pages/Home/Homepage.css'
-import { LocomotiveScrollProvider } from 'react-locomotive-scroll'
 import { useRef } from 'react'
+import { LocomotiveScrollProvider } from 'react-locomotive-scroll'
+import './Homepage.css'
 
-function App() {
+function Homepage() {
   const ref = useRef(null)
 
   const options = {
@@ -42,4 +41,4 @@ function App() {
   )
 }
 
-export default App
+export default Homepage

@@ -2,6 +2,21 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "dev": "next dev | bunyan",
+    "build": "next build",
+    "start": "NODE_ENV=production node server.js",
+    "debug": "NODE_OPTIONS='--inspect' next dev | bunyan",
+    "type-check": "tsc --pretty --noEmit",
+    "format": "prettier --write \"./**/*.{js,ts,tsx}\"",
+    "format-check": "prettier --check \"./**/*.{js,ts,tsx,jsx}\"",
+    "lint": "eslint . --ext ts --ext tsx --ext js",
+    "cypress:ci": "cypress run --config-file cypress-ci.config.ts --record --key 6e1c5983-67c1-45ea-b43f-8ec4287ecc17",
+    "cypress": "cypress open",
+    "test": "jest --coverage",
+    "test-all": "yarn lint && yarn type-check && yarn test",
+    "analyze": "ANALYZE=true || set ANALYZE=true&& next build"
+  },
   "dependencies": {
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
@@ -18,33 +33,31 @@
     "typescript": "^4.4.2",
     "web-vitals": "^2.1.0"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+  "devDependencies": {
+    "bunyan": "^1.8.15",
+    "eslint": "^8.26.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1",
+    "prettier-config-standard": "^5.0.0"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "yarn run type-check"
+    }
+  },
+  "lint-staged": {
+    "*.@(ts|tsx)": [
+      "yarn lint",
+      "yarn format-check"
+    ]
+  },
+  "prettier": "prettier-config-standard",
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "eslint": "^8.26.0",
-    "prettier": "^2.7.1",
-    "prettier-config-standard": "^5.0.0"
   }
 }
