@@ -41,5 +41,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint": "^8.26.0",
+    "prettier": "^2.7.1",
+    "prettier-config-standard": "^5.0.0"
   }
 }

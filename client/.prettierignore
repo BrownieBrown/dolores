@@ -1,0 +1,8 @@
+npm install --save-dev prettier-config-standardnode_modules
+.next
+.yalc
+yarn.lock
+yalc.lock
+package-lock.json
+public
+coverage

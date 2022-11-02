@@ -1,0 +1,13 @@
+**/node_modules/*
+**/out/*
+**/.next/*
+**/.yalc/*
+
+*.js
+tsconfig.json
+
+declarations.d.ts
+yarn.lock
+yalc.lock
+package-lock.json
+

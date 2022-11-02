@@ -33,7 +33,7 @@ function App() {
                     </h1>
                 </section>
                 <section className="footer" data-scroll-section>
-                    <h1>“I don’t wanna be in a story. All I want is to not look forward or back. I just wanna be… in the moment I’m in.”</h1>
+                    <h1>I don’t wanna be in a story. All I want is to not look forward or back. I just wanna be… in the moment I’m in.</h1>
                 </section>
             </main>
         </LocomotiveScrollProvider>
