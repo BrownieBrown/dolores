@@ -14,7 +14,7 @@ function App() {
         <LocomotiveScrollProvider options={options} containerRef={ref}>
             <main data-scroll-container ref={ref}>
                 <section className="intro" data-scroll-section>
-                    <h1>This is the Introduction section</h1>
+                    <h1>Welcome To Dolores</h1>
                 </section>
                 <section className="contents" data-scroll-section>
                     <h1
@@ -22,18 +22,18 @@ function App() {
                         data-scroll-direction="horizontal"
                         data-scroll-speed="9"
                     >
-                        I Love React
+                        That which is real is irreplaceable.
                     </h1>
                     <h1
                         data-scroll
                         data-scroll-direction="vertical"
                         data-scroll-speed="9" // Values provided here affect the animations
                     >
-                        That's why I code every day
+                        Carpe Diem
                     </h1>
                 </section>
                 <section className="footer" data-scroll-section>
-                    <h1>Let's end the application with this Footer</h1>
+                    <h1>“I don’t wanna be in a story. All I want is to not look forward or back. I just wanna be… in the moment I’m in.”</h1>
                 </section>
             </main>
         </LocomotiveScrollProvider>
