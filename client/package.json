@@ -3,19 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev | bunyan",
-    "build": "next build",
-    "start": "NODE_ENV=production node server.js",
-    "debug": "NODE_OPTIONS='--inspect' next dev | bunyan",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "type-check": "tsc --pretty --noEmit",
     "format": "prettier --write \"./**/*.{js,ts,tsx}\"",
     "format-check": "prettier --check \"./**/*.{js,ts,tsx,jsx}\"",
     "lint": "eslint . --ext ts --ext tsx --ext js",
-    "cypress:ci": "cypress run --config-file cypress-ci.config.ts --record --key 6e1c5983-67c1-45ea-b43f-8ec4287ecc17",
-    "cypress": "cypress open",
     "test": "jest --coverage",
-    "test-all": "yarn lint && yarn type-check && yarn test",
-    "analyze": "ANALYZE=true || set ANALYZE=true&& next build"
+    "test-all": "yarn lint && yarn type-check && yarn test"
   },
   "dependencies": {
     "@testing-library/jest-dom": "^5.14.1",
