@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { LocomotiveScrollProvider } from 'react-locomotive-scroll'
 import './Homepage.css'
 
-function Homepage() {
+export default function Homepage() {
   const ref = useRef(null)
 
   const options = {
@@ -40,5 +40,3 @@ function Homepage() {
     </LocomotiveScrollProvider>
   )
 }
-
-export default Homepage
