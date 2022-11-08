@@ -7,8 +7,10 @@ import mbraun.server.repository.UserRepository
 import mbraun.server.service.UserService
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
+@Profile("test")
 @Component
 class DataInitializer(
     val userRepository: UserRepository,
