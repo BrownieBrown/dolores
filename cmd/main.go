@@ -16,7 +16,8 @@ func main() {
 	db := database.NewDB(dbPath)
 	ch := handler.NewChirpHandler(db)
 	hh := handler.NewHealthHandler()
-	r.Init(apiCfg, ch, hh)
+	uh := handler.NewUserHandler(db)
+	r.Init(apiCfg, ch, hh, uh)
 
 	corsMux := middleware2.Cors(r)
 

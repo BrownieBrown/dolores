@@ -14,7 +14,7 @@ func NewRouter() *Router {
 	return &Router{http.NewServeMux()}
 }
 
-func (r *Router) Init(cfg *middleware.ApiConfig, ch *handler.ChirpHandler, hh *handler.HealthHandler) {
+func (r *Router) Init(cfg *middleware.ApiConfig, ch *handler.ChirpHandler, hh *handler.HealthHandler, uh *handler.UserHandler) {
 	fileServerHandler := http.StripPrefix("/app/", http.FileServer(http.Dir(".")))
 	r.Handle("/app/", cfg.IncrementFileServerHits(fileServerHandler))
 
@@ -31,4 +31,6 @@ func (r *Router) Init(cfg *middleware.ApiConfig, ch *handler.ChirpHandler, hh *h
 	r.HandleFunc("GET /api/chirps", ch.GetChirps)
 	r.HandleFunc("GET /api/chirps/{id}", ch.GetChirp)
 
+	r.HandleFunc("POST /api/users", uh.SignUp)
+	r.HandleFunc("POST /api/login", uh.SignIn)
 }
