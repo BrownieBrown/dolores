@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"github.com/BrownieBrown/dolores/internal/config"
 	"github.com/BrownieBrown/dolores/internal/database"
 	"github.com/BrownieBrown/dolores/internal/models"
 	"github.com/BrownieBrown/dolores/internal/utils"
@@ -12,11 +13,13 @@ import (
 )
 
 type ChirpHandler struct {
+	Config   *config.ApiConfig
 	Database *database.DB
 }
 
-func NewChirpHandler(database *database.DB) *ChirpHandler {
+func NewChirpHandler(config *config.ApiConfig, database *database.DB) *ChirpHandler {
 	return &ChirpHandler{
+		Config:   config,
 		Database: database,
 	}
 }

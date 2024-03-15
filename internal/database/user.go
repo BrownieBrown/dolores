@@ -68,6 +68,24 @@ func (db *DB) CreateUser(signupReq models.SignUpRequest) (models.User, error) {
 	return newUser, nil
 }
 
+func (db *DB) UpdateUser(user models.User) error {
+	db.mux.Lock()
+	defer db.mux.Unlock()
+
+	dbContent, err := db.loadDB()
+	if err != nil {
+		return err
+	}
+
+	dbContent.Users[user.ID] = user
+
+	if err = db.writeDB(dbContent); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (db *DB) searchUserByEmail(email string) (models.User, error) {
 	dbContent, err := db.loadDB()
 	if err != nil {
@@ -87,6 +105,20 @@ func (db *DB) GetUserByEmail(email string) (models.User, error) {
 	user, err := db.searchUserByEmail(email)
 	if err != nil {
 		return models.User{}, err
+	}
+
+	return user, nil
+}
+
+func (db *DB) GetUserByID(id int) (models.User, error) {
+	dbContent, err := db.loadDB()
+	if err != nil {
+		return models.User{}, err
+	}
+
+	user, ok := dbContent.Users[id]
+	if !ok {
+		return models.User{}, errors.New("user not found")
 	}
 
 	return user, nil

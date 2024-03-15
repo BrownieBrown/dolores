@@ -2,7 +2,6 @@ package router
 
 import (
 	"github.com/BrownieBrown/dolores/internal/api/handler"
-	"github.com/BrownieBrown/dolores/internal/api/middleware"
 	"net/http"
 )
 
@@ -14,18 +13,18 @@ func NewRouter() *Router {
 	return &Router{http.NewServeMux()}
 }
 
-func (r *Router) Init(cfg *middleware.ApiConfig, ch *handler.ChirpHandler, hh *handler.HealthHandler, uh *handler.UserHandler) {
+func (r *Router) Init(ch *handler.ChirpHandler, hh *handler.HealthHandler, uh *handler.UserHandler, mh *handler.MetricsHandler) {
 	fileServerHandler := http.StripPrefix("/app/", http.FileServer(http.Dir(".")))
-	r.Handle("/app/", cfg.IncrementFileServerHits(fileServerHandler))
+	r.Handle("/app/", mh.IncrementFileServerHits(fileServerHandler))
 
 	assetHandler := http.StripPrefix("/app/assets/", http.FileServer(http.Dir("./assets")))
-	r.Handle("/app/assets/", cfg.IncrementFileServerHits(assetHandler))
+	r.Handle("/app/assets/", mh.IncrementFileServerHits(assetHandler))
 
 	r.HandleFunc("GET /api/healthz", hh.GetHealth)
 
-	r.HandleFunc("GET /admin/metrics", cfg.GetFileServerHits)
+	r.HandleFunc("GET /admin/metrics", mh.GetFileServerHits)
 
-	r.HandleFunc("GET /api/reset", cfg.ResetFileServerHits)
+	r.HandleFunc("GET /api/reset", mh.ResetFileServerHits)
 
 	r.HandleFunc("POST /api/chirps", ch.CreateChirp)
 	r.HandleFunc("GET /api/chirps", ch.GetChirps)
@@ -33,4 +32,5 @@ func (r *Router) Init(cfg *middleware.ApiConfig, ch *handler.ChirpHandler, hh *h
 
 	r.HandleFunc("POST /api/users", uh.SignUp)
 	r.HandleFunc("POST /api/login", uh.SignIn)
+	r.HandleFunc("PUT /api/users", uh.UpdateUser)
 }
