@@ -2,18 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/BrownieBrown/dolores/internal/config"
 	"github.com/BrownieBrown/dolores/internal/database"
 	"github.com/BrownieBrown/dolores/internal/models"
 	"github.com/BrownieBrown/dolores/internal/utils"
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
-	"strings"
-	"time"
 )
 
 type UserHandler struct {
@@ -72,16 +67,23 @@ func (uh *UserHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := uh.generateToken(user.ID, loginReq.ExpiresInSeconds)
+	accessToken, err := uh.generateAccessToken(user.ID)
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, "Failed to generate token")
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to generate accessToken")
+		return
+	}
+
+	refreshToken, err := uh.generateRefreshToken(user.ID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Failed to generate refreshToken")
 		return
 	}
 
 	signInResponse := models.SignInResponse{
-		Email: user.Email,
-		ID:    user.ID,
-		Token: token,
+		Email:        user.Email,
+		ID:           user.ID,
+		Token:        accessToken,
+		RefreshToken: refreshToken,
 	}
 
 	utils.WriteData(w, http.StatusOK, signInResponse)
@@ -99,7 +101,7 @@ func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claims, err := uh.validateToken(tokenString)
+	claims, err := uh.validateAccessToken(tokenString)
 	if err != nil {
 		utils.WriteError(w, http.StatusUnauthorized, err.Error())
 		return
@@ -139,63 +141,4 @@ func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteData(w, http.StatusOK, response)
-}
-
-func (uh *UserHandler) validateToken(tokenString string) (*jwt.RegisteredClaims, error) {
-	claims := &jwt.RegisteredClaims{}
-
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(uh.Config.JwtSecret), nil
-	})
-
-	if err != nil || !token.Valid {
-		return nil, errors.New("invalid token")
-	}
-
-	return claims, nil
-}
-
-func extractTokenFromAuthHeader(r *http.Request) (string, error) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		return "", errors.New("bearer token not found in Authorization header")
-	}
-
-	parts := strings.Split(authHeader, " ")
-	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-		return "", errors.New("invalid Authorization header format")
-	}
-
-	return parts[1], nil
-}
-
-func (uh *UserHandler) generateToken(userID int, expiresInSeconds *int) (string, error) {
-	issuer := "chirpy"
-	method := jwt.SigningMethodHS256
-	subject := fmt.Sprintf("%d", userID)
-	issuedAt := jwt.NewNumericDate(time.Now())
-
-	var expiresAt *jwt.NumericDate
-	if expiresInSeconds != nil {
-		expiresAt = jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(*expiresInSeconds)))
-	}
-
-	claims := jwt.RegisteredClaims{
-		Issuer:    issuer,
-		Subject:   subject,
-		IssuedAt:  issuedAt,
-		ExpiresAt: expiresAt,
-	}
-
-	jwtToken := jwt.NewWithClaims(method, claims)
-	signedToken, err := jwtToken.SignedString([]byte(uh.Config.JwtSecret))
-	if err != nil {
-		return "", err
-	}
-
-	return signedToken, nil
 }

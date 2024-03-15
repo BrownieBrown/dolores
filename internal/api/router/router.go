@@ -33,4 +33,7 @@ func (r *Router) Init(ch *handler.ChirpHandler, hh *handler.HealthHandler, uh *h
 	r.HandleFunc("POST /api/users", uh.SignUp)
 	r.HandleFunc("POST /api/login", uh.SignIn)
 	r.HandleFunc("PUT /api/users", uh.UpdateUser)
+
+	r.HandleFunc("POST /api/refresh", uh.RefreshToken)
+	r.HandleFunc("POST /api/revoke", uh.InvalidateRefreshToken)
 }

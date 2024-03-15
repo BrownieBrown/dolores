@@ -5,6 +5,7 @@ import (
 	"github.com/BrownieBrown/dolores/internal/models"
 	"os"
 	"sync"
+	"time"
 )
 
 type DB struct {
@@ -13,8 +14,9 @@ type DB struct {
 }
 
 type DBStructure struct {
-	Chirps map[int]models.Chirp `json:"chirps"`
-	Users  map[int]models.User  `json:"users"`
+	Chirps               map[int]models.Chirp `json:"chirps"`
+	Users                map[int]models.User  `json:"users"`
+	InvalidRefreshTokens map[string]time.Time `json:"invalid_refresh_tokens"`
 }
 
 func NewDB(path string) *DB {
@@ -22,7 +24,7 @@ func NewDB(path string) *DB {
 }
 
 func (db *DB) loadDB() (DBStructure, error) {
-	dbContent := DBStructure{Chirps: make(map[int]models.Chirp), Users: make(map[int]models.User)}
+	dbContent := DBStructure{Chirps: make(map[int]models.Chirp), Users: make(map[int]models.User), InvalidRefreshTokens: make(map[string]time.Time)}
 
 	data, err := os.ReadFile(db.path)
 	if err == nil {
