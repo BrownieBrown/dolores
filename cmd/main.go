@@ -24,6 +24,12 @@ func main() {
 
 	r := router.NewRouter()
 	db := database.NewDB(dbPath)
+	err = db.DeleteOldDBFileIfExists(dbPath)
+	if err != nil {
+		log.Fatal(err)
+
+	}
+
 	ch := handler.NewChirpHandler(cfg, db)
 	hh := handler.NewHealthHandler(cfg)
 	uh := handler.NewUserHandler(cfg, db)

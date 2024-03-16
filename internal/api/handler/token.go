@@ -8,7 +8,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -18,7 +17,7 @@ func (uh *UserHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, err := extractTokenFromAuthHeader(r)
+	tokenString, err := utils.ExtractTokenFromAuthHeader(r)
 	if err != nil {
 		utils.WriteError(w, http.StatusUnauthorized, err.Error())
 		return
@@ -55,7 +54,7 @@ func (uh *UserHandler) InvalidateRefreshToken(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	tokenString, err := extractTokenFromAuthHeader(r)
+	tokenString, err := utils.ExtractTokenFromAuthHeader(r)
 	if err != nil {
 		utils.WriteError(w, http.StatusUnauthorized, err.Error())
 		return
@@ -74,25 +73,6 @@ func (uh *UserHandler) InvalidateRefreshToken(w http.ResponseWriter, r *http.Req
 	}
 
 	utils.WriteData(w, http.StatusOK, nil)
-}
-
-func (uh *UserHandler) validateAccessToken(tokenString string) (*jwt.RegisteredClaims, error) {
-	claims := &jwt.RegisteredClaims{}
-	accessTokenIssuer := "chirpy-access"
-
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(uh.Config.JwtSecret), nil
-	})
-
-	if err != nil || !token.Valid || claims.Issuer != accessTokenIssuer {
-		return nil, errors.New("invalid token")
-	}
-
-	return claims, nil
 }
 
 func (uh *UserHandler) validateRefreshToken(tokenString string) (*jwt.RegisteredClaims, error) {
@@ -116,20 +96,6 @@ func (uh *UserHandler) validateRefreshToken(tokenString string) (*jwt.Registered
 	}
 
 	return claims, nil
-}
-
-func extractTokenFromAuthHeader(r *http.Request) (string, error) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		return "", errors.New("bearer token not found in Authorization header")
-	}
-
-	parts := strings.Split(authHeader, " ")
-	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-		return "", errors.New("invalid Authorization header format")
-	}
-
-	return parts[1], nil
 }
 
 func (uh *UserHandler) generateAccessToken(userID int) (string, error) {

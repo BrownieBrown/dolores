@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func (db *DB) CreateChirp(body string) (models.Chirp, error) {
+func (db *DB) CreateChirp(chirp models.Chirp) (models.Chirp, error) {
 	db.mux.Lock()
 	defer db.mux.Unlock()
 
@@ -16,7 +16,7 @@ func (db *DB) CreateChirp(body string) (models.Chirp, error) {
 	}
 
 	lastChirpID := len(dbContent.Chirps)
-	newChirp := models.Chirp{ID: lastChirpID + 1, Body: body}
+	newChirp := models.Chirp{ID: lastChirpID + 1, Body: chirp.Body, AuthorID: chirp.AuthorID}
 	dbContent.Chirps[newChirp.ID] = newChirp
 
 	if err = db.writeDB(dbContent); err != nil {
@@ -64,5 +64,5 @@ func (db *DB) GetChirp(id string) (models.Chirp, error) {
 		}
 	}
 
-	return models.Chirp{}, errors.New("Chirp not found")
+	return models.Chirp{}, errors.New("chirp not found")
 }

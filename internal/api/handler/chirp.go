@@ -9,6 +9,7 @@ import (
 	"github.com/BrownieBrown/dolores/internal/utils"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -30,6 +31,25 @@ func (ch *ChirpHandler) CreateChirp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tokenString, err := utils.ExtractTokenFromAuthHeader(r)
+	if err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	claims, err := utils.ValidateAccessToken(tokenString, ch.Config)
+	if err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, err.Error())
+		return
+
+	}
+
+	userID, err := strconv.Atoi(claims.Subject)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+
 	var chirp models.Chirp
 	if err := json.NewDecoder(r.Body).Decode(&chirp); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid request payload")
@@ -48,8 +68,10 @@ func (ch *ChirpHandler) CreateChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	chirp.Body = result
+	chirp.AuthorID = userID
 
-	newChirp, err := ch.Database.CreateChirp(chirp.Body)
+	newChirp, err := ch.Database.CreateChirp(chirp)
+
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, "Failed to create chirp")
 		return

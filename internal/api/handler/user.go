@@ -95,13 +95,13 @@ func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, err := extractTokenFromAuthHeader(r)
+	tokenString, err := utils.ExtractTokenFromAuthHeader(r)
 	if err != nil {
 		utils.WriteError(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	claims, err := uh.validateAccessToken(tokenString)
+	claims, err := utils.ValidateAccessToken(tokenString, uh.Config)
 	if err != nil {
 		utils.WriteError(w, http.StatusUnauthorized, err.Error())
 		return
