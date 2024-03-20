@@ -29,6 +29,7 @@ func (r *Router) Init(ch *handler.ChirpHandler, hh *handler.HealthHandler, uh *h
 	r.HandleFunc("POST /api/chirps", ch.CreateChirp)
 	r.HandleFunc("GET /api/chirps", ch.GetChirps)
 	r.HandleFunc("GET /api/chirps/{id}", ch.GetChirp)
+	r.HandleFunc("DELETE /api/chirps/{id}", ch.DeleteChirp)
 
 	r.HandleFunc("POST /api/users", uh.SignUp)
 	r.HandleFunc("POST /api/login", uh.SignIn)
@@ -36,4 +37,6 @@ func (r *Router) Init(ch *handler.ChirpHandler, hh *handler.HealthHandler, uh *h
 
 	r.HandleFunc("POST /api/refresh", uh.RefreshToken)
 	r.HandleFunc("POST /api/revoke", uh.InvalidateRefreshToken)
+
+	r.HandleFunc("POST /api/polka/webhooks", uh.UpdatePremiumMembership)
 }

@@ -1,10 +1,11 @@
 package models
 
 type SignInResponse struct {
-	ID           int    `json:"id"`
-	Email        string `json:"email"`
-	Token        string `json:"token"`
-	RefreshToken string `json:"refresh_token"`
+	ID            int    `json:"id"`
+	Email         string `json:"email"`
+	PremiumMember bool   `json:"is_chirpy_red"`
+	Token         string `json:"token"`
+	RefreshToken  string `json:"refresh_token"`
 }
 
 type SignInRequest struct {
@@ -18,8 +19,9 @@ type SignUpRequest struct {
 }
 
 type SignUpResponse struct {
-	Email string `json:"email"`
-	ID    int    `json:"id"`
+	Email         string `json:"email"`
+	ID            int    `json:"id"`
+	PremiumMember bool   `json:"is_chirpy_red"`
 }
 
 type UpdateUserRequest struct {
@@ -28,8 +30,9 @@ type UpdateUserRequest struct {
 }
 
 type UpdateUserResponse struct {
-	Email string `json:"email"`
-	ID    int    `json:"id"`
+	Email         string `json:"email"`
+	ID            int    `json:"id"`
+	PremiumMember bool   `json:"is_chirpy_red"`
 }
 
 type RefreshTokenResponse struct {

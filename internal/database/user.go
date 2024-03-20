@@ -58,7 +58,7 @@ func (db *DB) CreateUser(signupReq models.SignUpRequest) (models.User, error) {
 	}
 
 	lastUserID := len(dbContent.Users)
-	newUser := models.User{ID: lastUserID + 1, Email: signupReq.Email, Password: hashedPassword}
+	newUser := models.User{ID: lastUserID + 1, Email: signupReq.Email, Password: hashedPassword, PremiumMember: false}
 	dbContent.Users[newUser.ID] = newUser
 
 	if err = db.writeDB(dbContent); err != nil {

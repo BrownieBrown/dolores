@@ -39,5 +39,21 @@ func ExtractTokenFromAuthHeader(r *http.Request) (string, error) {
 		return "", errors.New("invalid Authorization header format")
 	}
 
-	return parts[1], nil
+	bearerToken := parts[1]
+	return bearerToken, nil
+}
+
+func ExtractAPIKeyFromAuthHeader(r *http.Request) (string, error) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return "", errors.New("API key not found in Authorization header")
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || strings.ToLower(parts[0]) != "apikey" { // Ensure this matches lowercase conversion
+		return "", errors.New("invalid Authorization header format")
+	}
+
+	apiKey := parts[1]
+	return apiKey, nil
 }
